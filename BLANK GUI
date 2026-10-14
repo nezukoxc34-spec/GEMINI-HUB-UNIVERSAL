@@ -1,0 +1,489 @@
+--// Olly Hubi — Multi-Game Universal Template (No Functions)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
+
+local C = {
+    bg = Color3.fromRGB(38, 24, 75),
+    header = Color3.fromRGB(75, 45, 150),
+    border = Color3.fromRGB(120, 80, 220),
+    yellow = Color3.fromRGB(255, 215, 0),
+    white = Color3.fromRGB(255, 255, 255),
+    off = Color3.fromRGB(52, 35, 100),
+    on = Color3.fromRGB(255, 215, 0),
+    red = Color3.fromRGB(220, 50, 50),
+}
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "OllyHubiShell"
+gui.ResetOnSpawn = false
+gui.Parent = game:GetService("CoreGui")
+
+----------------------------------------------------
+--// LOADING SCREEN
+----------------------------------------------------
+local loaderFrame = Instance.new("Frame")
+loaderFrame.Size = UDim2.new(0, 260, 0, 140)
+loaderFrame.Position = UDim2.new(0.5, -130, 0.5, -70)
+loaderFrame.BackgroundColor3 = C.bg
+loaderFrame.BorderSizePixel = 0
+loaderFrame.Active = true
+loaderFrame.Parent = gui
+
+Instance.new("UICorner", loaderFrame).CornerRadius = UDim.new(0, 12)
+
+local loaderStroke = Instance.new("UIStroke")
+loaderStroke.Color = C.border
+loaderStroke.Thickness = 2
+loaderStroke.Parent = loaderFrame
+
+local loaderTitle = Instance.new("TextLabel")
+loaderTitle.Size = UDim2.new(1, 0, 0, 35)
+loaderTitle.Position = UDim2.new(0, 0, 0, 10)
+loaderTitle.BackgroundTransparency = 1
+loaderTitle.Text = "Olly Hubi"
+loaderTitle.TextColor3 = C.yellow
+loaderTitle.Font = Enum.Font.GothamBlack
+loaderTitle.TextSize = 20
+loaderTitle.Parent = loaderFrame
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, -30, 0, 16)
+statusLabel.Position = UDim2.new(0, 15, 0, 50)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "Detecting game environment..."
+statusLabel.TextColor3 = Color3.fromRGB(180, 170, 210)
+statusLabel.Font = Enum.Font.GothamMedium
+statusLabel.TextSize = 10
+statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+statusLabel.Parent = loaderFrame
+
+local percentLabel = Instance.new("TextLabel")
+percentLabel.Size = UDim2.new(0, 40, 0, 16)
+percentLabel.Position = UDim2.new(1, -55, 0, 50)
+percentLabel.BackgroundTransparency = 1
+percentLabel.Text = "0%"
+percentLabel.TextColor3 = C.yellow
+percentLabel.Font = Enum.Font.GothamBold
+percentLabel.TextSize = 10
+percentLabel.TextXAlignment = Enum.TextXAlignment.Right
+percentLabel.Parent = loaderFrame
+
+local progressTrack = Instance.new("Frame")
+progressTrack.Size = UDim2.new(1, -30, 0, 8)
+progressTrack.Position = UDim2.new(0, 15, 0, 72)
+progressTrack.BackgroundColor3 = Color3.fromRGB(25, 18, 50)
+progressTrack.BorderSizePixel = 0
+progressTrack.Parent = loaderFrame
+Instance.new("UICorner", progressTrack).CornerRadius = UDim.new(0, 4)
+
+local progressBar = Instance.new("Frame")
+progressBar.Size = UDim2.new(0, 0, 1, 0)
+progressBar.BackgroundColor3 = C.yellow
+progressBar.BorderSizePixel = 0
+progressBar.Parent = progressTrack
+Instance.new("UICorner", progressBar).CornerRadius = UDim.new(0, 4)
+
+----------------------------------------------------
+--// MAIN GUI
+----------------------------------------------------
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 230, 0, 290)
+main.Position = UDim2.new(0.5, -115, 0.5, -145)
+main.BackgroundColor3 = C.bg
+main.BorderSizePixel = 0
+main.Active = true
+main.ClipsDescendants = true
+main.Visible = false
+main.Parent = gui
+
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
+
+local mainStroke = Instance.new("UIStroke")
+mainStroke.Color = C.border
+mainStroke.Thickness = 2
+mainStroke.Parent = main
+
+-- Header
+local header = Instance.new("Frame")
+header.Size = UDim2.new(1, 0, 0, 36)
+header.BackgroundColor3 = C.header
+header.BorderSizePixel = 0
+header.Parent = main
+Instance.new("UICorner", header).CornerRadius = UDim.new(0, 10)
+
+local star = Instance.new("TextLabel")
+star.Size = UDim2.new(0, 28, 0, 28)
+star.Position = UDim2.new(0, 6, 0, 4)
+star.BackgroundTransparency = 1
+star.Text = "📜"
+star.TextSize = 16
+star.Parent = header
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -60, 1, 0)
+title.Position = UDim2.new(0, 38, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "Olly Hubi"
+title.TextColor3 = C.yellow
+title.Font = Enum.Font.GothamBlack
+title.TextSize = 13
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = header
+
+local minBtn = Instance.new("TextButton")
+minBtn.Size = UDim2.new(0, 26, 0, 26)
+minBtn.Position = UDim2.new(1, -32, 0, 5)
+minBtn.BackgroundColor3 = C.off
+minBtn.Text = "—"
+minBtn.TextColor3 = C.white
+minBtn.Font = Enum.Font.GothamBold
+minBtn.TextSize = 12
+minBtn.Parent = header
+Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 6)
+
+-- Drag header logic
+local dragging, dragStart, startPos
+header.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = main.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+local body = Instance.new("ScrollingFrame")
+body.Size = UDim2.new(1, 0, 1, -36)
+body.Position = UDim2.new(0, 0, 0, 36)
+body.BackgroundTransparency = 1
+body.BorderSizePixel = 0
+body.CanvasSize = UDim2.new(0, 0, 0, 280)
+body.ScrollBarThickness = 4
+body.Parent = main
+
+----------------------------------------------------
+--// DUMMY UI UI COMPONENTS
+----------------------------------------------------
+local function createGameCategory(name, yPos)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -16, 0, 20)
+    label.Position = UDim2.new(0, 8, 0, yPos)
+    label.BackgroundTransparency = 1
+    label.Text = "🎮 " .. string.upper(name)
+    label.TextColor3 = C.yellow
+    label.Font = Enum.Font.GothamBlack
+    label.TextSize = 11
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = body
+end
+
+local function createBlankToggle(name, yPos)
+    local row = Instance.new("TextButton")
+    row.Size = UDim2.new(1, -16, 0, 30)
+    row.Position = UDim2.new(0, 8, 0, yPos)
+    row.BackgroundColor3 = C.off
+    row.BorderSizePixel = 0
+    row.Text = ""
+    row.Parent = body
+    Instance.new("UICorner", row).CornerRadius = UDim.new(0, 6)
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(70, 50, 130)
+    stroke.Thickness = 1
+    stroke.Parent = row
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -55, 1, 0)
+    label.Position = UDim2.new(0, 10, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = "🔹 " .. name
+    label.TextColor3 = C.white
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 11
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = row
+
+    local state = Instance.new("TextLabel")
+    state.Size = UDim2.new(0, 42, 0, 20)
+    state.Position = UDim2.new(1, -48, 0.5, -10)
+    state.BackgroundColor3 = Color3.fromRGB(30, 20, 60)
+    state.Text = "OFF"
+    state.TextColor3 = Color3.fromRGB(160, 160, 160)
+    state.Font = Enum.Font.GothamBold
+    state.TextSize = 10
+    state.Parent = row
+    Instance.new("UICorner", state).CornerRadius = UDim.new(0, 4)
+
+    local on = false
+    row.MouseButton1Click:Connect(function()
+        on = not on
+        state.Text = on and "ON" or "OFF"
+        state.BackgroundColor3 = on and C.on or Color3.fromRGB(30, 20, 60)
+        state.TextColor3 = on and Color3.fromRGB(30, 20, 60) or Color3.fromRGB(160, 160, 160)
+    end)
+    return row
+end
+
+local function createBlankSlider(name, yPos, min, max, default)
+    local row = Instance.new("Frame")
+    row.Size = UDim2.new(1, -16, 0, 46)
+    row.Position = UDim2.new(0, 8, 0, yPos)
+    row.BackgroundColor3 = C.off
+    row.BorderSizePixel = 0
+    row.Parent = body
+    Instance.new("UICorner", row).CornerRadius = UDim.new(0, 6)
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(70, 50, 130)
+    stroke.Thickness = 1
+    stroke.Parent = row
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -20, 0, 18)
+    label.Position = UDim2.new(0, 10, 0, 4)
+    label.BackgroundTransparency = 1
+    label.Text = name .. ": " .. default
+    label.TextColor3 = C.white
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 11
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = row
+
+    local sliderBtn = Instance.new("TextButton")
+    sliderBtn.Size = UDim2.new(1, -20, 0, 12)
+    sliderBtn.Position = UDim2.new(0, 10, 0, 26)
+    sliderBtn.BackgroundColor3 = Color3.fromRGB(25, 18, 50)
+    sliderBtn.Text = ""
+    sliderBtn.AutoButtonColor = false
+    sliderBtn.BorderSizePixel = 0
+    sliderBtn.Parent = row
+    Instance.new("UICorner", sliderBtn).CornerRadius = UDim.new(0, 4)
+
+    local fill = Instance.new("Frame")
+    local initPercent = math.clamp((default - min) / (max - min), 0, 1)
+    fill.Size = UDim2.new(initPercent, 0, 1, 0)
+    fill.BackgroundColor3 = C.yellow
+    fill.BorderSizePixel = 0
+    fill.Parent = sliderBtn
+    Instance.new("UICorner", fill).CornerRadius = UDim.new(0, 4)
+
+    local activeDrag = false
+
+    local function updateValue(input)
+        local absPos = sliderBtn.AbsolutePosition.X
+        local absSize = sliderBtn.AbsoluteSize.X
+        local rel = math.clamp((input.Position.X - absPos) / absSize, 0, 1)
+        fill.Size = UDim2.new(rel, 0, 1, 0)
+        local val = math.floor(min + rel * (max - min))
+        label.Text = name .. ": " .. val
+    end
+
+    sliderBtn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            activeDrag = true
+            updateValue(input)
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            activeDrag = false
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if activeDrag and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            updateValue(input)
+        end
+    end)
+end
+
+-- Layout Elements
+createGameCategory("Universal Features", 8)
+createBlankToggle("Feature Slot A", 30)
+createBlankToggle("Feature Slot B", 64)
+
+createGameCategory("Game Specific", 102)
+createBlankToggle("Game Feature 1", 124)
+createBlankSlider("Custom Multiplier", 158, 1, 100, 50)
+
+-- Unload Button
+local unloadBtn = Instance.new("TextButton")
+unloadBtn.Size = UDim2.new(1, -16, 0, 30)
+unloadBtn.Position = UDim2.new(0, 8, 0, 220)
+unloadBtn.BackgroundColor3 = C.red
+unloadBtn.BorderSizePixel = 0
+unloadBtn.Text = "⚠️ Unload Hubi"
+unloadBtn.TextColor3 = C.white
+unloadBtn.Font = Enum.Font.GothamBold
+unloadBtn.TextSize = 11
+unloadBtn.Parent = body
+Instance.new("UICorner", unloadBtn).CornerRadius = UDim.new(0, 6)
+
+unloadBtn.MouseButton1Click:Connect(function()
+    gui:Destroy()
+end)
+
+----------------------------------------------------
+--// FIXED CUBE MINIMIZE
+----------------------------------------------------
+local minimized = false
+local savedPos = main.Position
+
+local cube = Instance.new("Frame")
+cube.Size = UDim2.new(0, 45, 0, 45)
+cube.Position = main.Position
+cube.BackgroundColor3 = C.bg
+cube.Visible = false
+cube.Active = true
+cube.Parent = gui
+Instance.new("UICorner", cube).CornerRadius = UDim.new(0, 10)
+
+local cubeStroke = Instance.new("UIStroke")
+cubeStroke.Color = C.border
+cubeStroke.Thickness = 2
+cubeStroke.Parent = cube
+
+local cubeLabel = Instance.new("TextLabel")
+cubeLabel.Size = UDim2.new(1, 0, 1, 0)
+cubeLabel.BackgroundTransparency = 1
+cubeLabel.Text = "📜"
+cubeLabel.TextSize = 22
+cubeLabel.Parent = cube
+
+local cubeDrag = false
+local cubeStart, cubeStartPos
+local hasMoved = false
+
+cube.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        cubeDrag = true
+        hasMoved = false
+        cubeStart = input.Position
+        cubeStartPos = cube.Position
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if cubeDrag and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - cubeStart
+        if math.abs(delta.X) > 5 or math.abs(delta.Y) > 5 then
+            hasMoved = true
+        end
+        cube.Position = UDim2.new(cubeStartPos.X.Scale, cubeStartPos.X.Offset + delta.X, cubeStartPos.Y.Scale, cubeStartPos.Y.Offset + delta.Y)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if cubeDrag then
+            cubeDrag = false
+            if not hasMoved and minimized then
+                minimized = false
+                main.Position = cube.Position
+                cube.Visible = false
+                main.Visible = true
+                main.Size = UDim2.new(0, 45, 0, 45)
+                main.BackgroundTransparency = 0
+
+                local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+                local tweenRestore = TweenService:Create(main, tweenInfo, {
+                    Size = UDim2.new(0, 230, 0, 290)
+                })
+
+                tweenRestore:Play()
+                tweenRestore.Completed:Connect(function()
+                    body.Visible = true
+                    header.Visible = true
+                end)
+            end
+        end
+    end
+end)
+
+minBtn.MouseButton1Click:Connect(function()
+    minimized = true
+    savedPos = main.Position
+
+    local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+    local tweenMain = TweenService:Create(main, tweenInfo, {
+        Size = UDim2.new(0, 45, 0, 45),
+        BackgroundTransparency = 1
+    })
+
+    body.Visible = false
+    header.Visible = false
+
+    tweenMain:Play()
+    tweenMain.Completed:Connect(function()
+        main.Visible = false
+        cube.Position = savedPos
+        cube.Visible = true
+    end)
+end)
+
+----------------------------------------------------
+--// LOADER ANIMATION
+----------------------------------------------------
+local modules = {
+    "Checking game PlaceId...",
+    "Loading game configuration...",
+    "Building user interface...",
+    "Applying themes...",
+    "Opening Olly Hubi..."
+}
+
+task.spawn(function()
+    local totalSteps = 100
+    for i = 1, totalSteps do
+        local progress = i / totalSteps
+        local tween = TweenService:Create(progressBar, TweenInfo.new(0.02, Enum.EasingStyle.Linear), {
+            Size = UDim2.new(progress, 0, 1, 0)
+        })
+        tween:Play()
+        percentLabel.Text = i .. "%"
+
+        if i == 20 then statusLabel.Text = modules[2]
+        elseif i == 50 then statusLabel.Text = modules[3]
+        elseif i == 75 then statusLabel.Text = modules[4]
+        elseif i == 90 then statusLabel.Text = modules[5]
+        end
+
+        task.wait(0.025)
+    end
+
+    statusLabel.Text = "Ready!"
+    task.wait(0.15)
+
+    local fadeLoader = TweenService:Create(loaderFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+        Size = UDim2.new(0, 280, 0, 0),
+        BackgroundTransparency = 1
+    })
+    fadeLoader:Play()
+
+    fadeLoader.Completed:Connect(function()
+        loaderFrame:Destroy()
+
+        main.Size = UDim2.new(0, 230, 0, 0)
+        main.Visible = true
+        
+        local openMain = TweenService:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 230, 0, 290)
+        })
+        openMain:Play()
+    end)
+end)
